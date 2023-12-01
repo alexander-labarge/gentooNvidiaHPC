@@ -94,7 +94,13 @@ countdown_timer
 # Install modules
 make -C "$kernel_src" -j$(nproc) modules_install
 einfo "Kernel Modules Installed Successfully."
-
+countdown_timer
+einfo "Generating Initramfs for early boot process..."
+countdown_timer
+# Generate initramfs
+genkernel initramfs
+einfo "Initramfs Generated Successfully."
+countdown_timer
 # Clean stale dependency packages
 einfo "Cleaning stale dependencies..."
 emerge --depclean
