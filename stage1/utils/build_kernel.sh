@@ -56,28 +56,44 @@ countdown_timer
 einfo "Importing NVIDIA GPU High Performance Oriented Kernel Config File..."
 cp /tmp/nvidia_kernel_config /usr/src/linux/.config
 einfo "Kernel Config File Imported Successfully."
+einfo "Kernel Source Directory: $new_kernel_dir"
+einfo "Kernel Version: $kernel_ver"
+einfo "Kernel Config File: /usr/src/linux/.config"
+countdown_timer
 
+einfo "Generating Kernel Make Files based on Custom Kernel Config File..."
+countdown_timer
 # Define the kernel source directory
 kernel_src="/usr/src/linux"
-
 # Run make oldconfig
 echo "n" | make -C "$kernel_src" oldconfig
+einfo "Kernel Make Files Generated Successfully."
 
+countdown_timer
+
+einfo "Compiling Kernel..."
+countdown_timer
 # Compile the kernel with the number of processors available
+einfo "Compiling Kernel with $(nproc) CPU processor cores..."
 make -C "$kernel_src" -j$(nproc)
-
-# Install the kernel
-make -C "$kernel_src" install
-
-# Install modules
-make -C "$kernel_src" modules_install
-
-# Calculate and display the time taken
+einfo "Kernel Compiled Successfully."
 end_time=$(date +%s)
 elapsed_time=$((end_time - start_time))
-einfo "Kernel Compile Complete."
 einfo "End time: $(date)"
-einfo "Kernel installation took $elapsed_time seconds."
+einfo "Kernel Compile took $elapsed_time seconds."
+
+countdown_timer
+einfo "Installing Kernel..."
+countdown_timer
+# Install the kernel
+make -C "$kernel_src" install
+einfo "Kernel Installed Successfully."
+countdown_timer
+einfo "Installing Kernel Modules..."
+countdown_timer
+# Install modules
+make -C "$kernel_src" -j$(nproc) modules_install
+einfo "Kernel Modules Installed Successfully."
 
 # Clean stale dependency packages
 einfo "Cleaning stale dependencies..."
