@@ -13,14 +13,10 @@ function einfo() {
     echo -e "${red}----------------------------------------------------------------------------${reset}"
 }
 
-
 function countdown_timer() {
-    for ((i = 1; i >= 0; i--)); do
-        if [ $i -gt 1 ]; then
+    for ((i = 3; i >= 0; i--)); do
+        if [ $i -gt 0 ]; then
             echo -ne "\r\033[K\e[31mContinuing in \e[34m$i\e[31m seconds\e[0m"
-        elif [ $i -eq 1 ]; then
-            echo -ne "\r\033[K\e[31mContinuing in 1 second\e[0m"
-            sleep 1
         else
             echo -e "\r\033[K\e[1;34mContinuing\e[0m"
         fi

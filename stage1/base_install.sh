@@ -14,69 +14,43 @@ trap 'eerror "An error occurred. Exiting..."; exit 1' ERR
 set -e
 
 # Drive identifier
-DRIVE="sdc"
+DRIVE="sda"
 
 # Predefined partition sizes
 EFI_SIZE="1G"
-HOME_SIZE="10G"
-VAR_SIZE="20G"
-TMP_SIZE="20G"
-USR_SIZE="10G"
-OPT_SIZE="10G"
-VAR_LOG_SIZE="2G"
+HOME_SIZE="100G"
+VAR_SIZE="100G"
+TMP_SIZE="100G"
+USR_SIZE="100G"
+OPT_SIZE="100G"
+VAR_LOG_SIZE="100G"
 
 # System configuration
 TIMEZONE="America/New_York"
 LOCALE="en_US.UTF-8"
-NODE_HOSTNAME="typhon-test"
-DEFAULT_USER="typhon"
+NODE_HOSTNAME="deathstar-tower"
+DEFAULT_USER="skywalker"
 GROUPS_TO_ADD="wheel"
 
 # Server and network configuration
-HEADNODE_SERVER_IP="192.168.50.124"
-IP_MAC_PROGRAM_ADDR="http://$HEADNODE_SERVER_IP/gentoo/ip_mac_export"
-TYPHON_DECRYPT_MIRROR_ADDR="http://$HEADNODE_SERVER_IP/gentoo/gentoo-source/"
-TYPHON_DECRYPT_RSYNC_SERVER="rsync://$HEADNODE_SERVER_IP/typhon-portage"
+MIRROR_SERVER_IP="192.168.50.124"
+IP_MAC_PROGRAM_ADDR="http://$MIRROR_SERVER_IP/gentoo/ip_mac_export"
+LOCAL_LINUX_SOURCE_SERVER="http://$MIRROR_SERVER_IP/gentoo/gentoo-source/"
+LOCAL_PORTAGE_RSYNC_SERVER="rsync://$MIRROR_SERVER_IP/typhon-portage"
 
 # Gentoo specific
-GENTOO_ARCH="amd64"
+TARGET_ARCH="amd64"
 STAGE3_BASENAME="stage3-amd64-systemd"
 
 # Directories
 TMP_DIR="/tmp/gentoo-stage3-download"
-BINDED_INSTALL_DIRECTORY="/tmp/chroot-transfer"  # Replace with the actual path
+BINDED_INSTALL_DIRECTORY="/tmp/chroot-transfer"
 CURRENT_INSTALL_DIRECTORY="$PWD"
 
 # Chroot directories
 INSTALL_DIR="$PWD"
 CHROOT_TMP_DIRECTORY="/mnt/gentoo/tmp"
 CHROOT_OPT_DIRECTORY="/mnt/gentoo/opt"
-
-function einfo() {
-    local blue='\e[1;34m'   # Light blue
-    local yellow='\e[1;33m' # Yellow
-    local red='\e[1;31m'    # Red
-    local reset='\e[0m'     # Reset text formatting
-
-    echo -e "${red}----------------------------------------------------------------------------${reset}"
-    echo -e "${blue}[${yellow}$(date '+%Y-%m-%d %H:%M:%S')${blue}] $1${reset}"
-    echo -e "${red}----------------------------------------------------------------------------${reset}"
-}
-
-
-function countdown_timer() {
-    for ((i = 1; i >= 0; i--)); do
-        if [ $i -gt 1 ]; then
-            echo -ne "\r\033[K\e[31mContinuing in \e[34m$i\e[31m seconds\e[0m"
-        elif [ $i -eq 1 ]; then
-            echo -ne "\r\033[K\e[31mContinuing in 1 second\e[0m"
-            sleep 1
-        else
-            echo -e "\r\033[K\e[1;34mContinuing\e[0m"
-        fi
-        sleep 1
-    done
-}
 
 # Function Definitions
 function select_drive() {
@@ -139,7 +113,6 @@ function configure_disks() {
 
     countdown_timer
 }
-
 
 function format_filesystems() {
     # Formatting the first partition (EFI) as FAT32
@@ -214,10 +187,10 @@ function mount_file_systems() {
     countdown_timer
     
     # Mount EFI partition
-    einfo "Making EFI directory... at /boot/efi"
-    mkdir -p "/mnt/gentoo/boot/efi"
+    einfo "Making EFI directory... at /efi"
+    mkdir -p "/mnt/gentoo/efi"
     einfo "EFI directory created."
-    mount "/dev/${DRIVE}1" "/mnt/gentoo/boot/efi"  # Assuming EFI is the 1st partition
+    mount "/dev/${DRIVE}1" "/mnt/gentoo/efi"  # Assuming EFI is the 1st partition
     einfo "Mounted EFI partition."
 
     countdown_timer
@@ -283,11 +256,12 @@ function mount_system_devices() {
 
 # Function to download stage3
 function download_stage3() {
-    einfo "Downloading stage3 tarball from $TYPHON_DECRYPT_MIRROR_ADDR"
+    einfo "Downloading stage3 tarball from $LOCAL_LINUX_SOURCE_SERVER"
     mkdir -p "$TMP_DIR"
     cd "$TMP_DIR" || { eerror "Could not cd into '$TMP_DIR'"; exit 1; }
 
-    STAGE3_RELEASES="$TYPHON_DECRYPT_MIRROR_ADDR/releases/$GENTOO_ARCH/autobuilds/current-$STAGE3_BASENAME/"
+    STAGE3_RELEASES="$LOCAL_LINUX_SOURCE_SERVER
+/releases/$TARGET_ARCH/autobuilds/current-$STAGE3_BASENAME/"
     CURRENT_STAGE3="$(wget -qO- "$STAGE3_RELEASES" | grep -o "\"${STAGE3_BASENAME}-[0-9A-Z]*.tar.xz\"" | sort -u | head -1)"
     CURRENT_STAGE3="${CURRENT_STAGE3:1:-1}"
 
@@ -350,7 +324,7 @@ main-repo = gentoo
 [gentoo]
 location = /var/db/repos/gentoo
 sync-type = rsync
-sync-uri = $TYPHON_DECRYPT_RSYNC_SERVER
+sync-uri = $LOCAL_PORTAGE_RSYNC_SERVER
 auto-sync = yes
 sync-rsync-verify-jobs = 1
 sync-rsync-verify-metamanifest = no
@@ -371,16 +345,15 @@ source /tmp/einfo_timer_util.sh
 # Update the make.conf file with the GENTOO_MIRRORS setting
 if grep -q "^GENTOO_MIRRORS" /etc/portage/make.conf; then
     # Update the existing GENTOO_MIRRORS entry
-    sed -i "/^GENTOO_MIRRORS/c\GENTOO_MIRRORS=\"$TYPHON_DECRYPT_MIRROR_ADDR\"" /etc/portage/make.conf
+    sed -i "/^GENTOO_MIRRORS/c\GENTOO_MIRRORS=\"$LOCAL_LINUX_SOURCE_SERVER\"" /etc/portage/make.conf
 else
     # Add a new GENTOO_MIRRORS entry
-    echo "GENTOO_MIRRORS=\"$TYPHON_DECRYPT_MIRROR_ADDR\"" >> /etc/portage/make.conf
+    echo "GENTOO_MIRRORS=\"$LOCAL_LINUX_SOURCE_SERVER\"" >> /etc/portage/make.conf
 fi
 echo 'ACCEPT_LICENSE="*"' >> /etc/portage/make.conf
 echo 'VIDEO_CARDS="nvidia"' >> /etc/portage/make.conf
 echo 'USE="X"' >> /etc/portage/make.conf
 echo 'LC_MESSAGES=C.utf8' >> /etc/portage/make.conf
-echo 'ACCEPT_KEYWORDS="~amd64"' >> /etc/portage/make.conf
 einfo "make.conf updated with new GENTOO_MIRRORS setting."
 EOF
     chmod +x /mnt/gentoo/tmp/update_make_conf.sh
@@ -433,14 +406,14 @@ function configure_chroot_environment() {
 
     einfo "Configuring chroot environment..."
 
-    # Create and bind the directories
-    mkdir -p "$BINDED_INSTALL_DIRECTORY" "$CHROOT_TMP_DIRECTORY" "$CHROOT_OPT_DIRECTORY"
-    mount --bind "$BINDED_INSTALL_DIRECTORY" "$CHROOT_TMP_DIRECTORY"
+    # Create the directories
+    mkdir -p "$CHROOT_TMP_DIRECTORY" "$CHROOT_OPT_DIRECTORY"
 
     # Copy external scripts to the chroot environment
     local scripts=(einfo_timer_util.sh nvidia_driver_install.sh ip_mac_export \
-                   setup_user_config.sh kernel_install_fstab.sh update_compiler_flags.sh \
-                   setup_bootloader.sh update_system_before_install.sh)
+                   setup_user_config.sh build_fstab.sh update_compiler_flags.sh \
+                   setup_bootloader.sh update_system_before_install.sh build_kernel.sh \
+                   nvidia_kernel_config)
 
     for script in "${scripts[@]}"; do
         local script_path="$CURRENT_INSTALL_DIRECTORY/utils/$script"
@@ -451,21 +424,21 @@ function configure_chroot_environment() {
         fi
     done
 
-    # Copy Source Code to /mnt/gentoo/opt
-    einfo "Copying Source Code to $CHROOT_OPT_DIRECTORY"
-    local source_codes=(nvhpc_2023_2311_Linux_x86_64_cuda_12.3.tar.gz \
-                        cuda_gdb_src-all-all-12.3.101.tar.gz \
-                        git-repos.tar.xz \
-                        hashcat-master.zip john-bleeding-jumbo.zip)
+    # # Copy Source Code to /mnt/gentoo/opt
+    # einfo "Copying Source Code to $CHROOT_OPT_DIRECTORY"
+    # local source_codes=(nvhpc_2023_2311_Linux_x86_64_cuda_12.3.tar.gz \
+    #                     cuda_gdb_src-all-all-12.3.101.tar.gz \
+    #                     git-repos.tar.xz \
+    #                     hashcat-master.zip john-bleeding-jumbo.zip)
 
-    for source_code in "${source_codes[@]}"; do
-        local source_code_path="$CURRENT_INSTALL_DIRECTORY/source_code/$source_code"
-        if [ -f "$source_code_path" ]; then
-            cp "$source_code_path" "$CHROOT_OPT_DIRECTORY/"
-        else
-            eerror "Source code $source_code not found in $source_code_path"
-        fi
-    done
+    # for source_code in "${source_codes[@]}"; do
+    #     local source_code_path="$CURRENT_INSTALL_DIRECTORY/source_code/$source_code"
+    #     if [ -f "$source_code_path" ]; then
+    #         cp "$source_code_path" "$CHROOT_OPT_DIRECTORY/"
+    #     else
+    #         eerror "Source code $source_code not found in $source_code_path"
+    #     fi
+    # done
 
     # Generate and copy additional scripts
     generate_repos_conf_script
@@ -502,7 +475,7 @@ function install_in_chroot() {
 
         set -e  # Exit immediately on error
 
-        . /etc/profile
+        source /etc/profile
 
         function einfo() {
             local blue='\e[1;34m'   # Light blue
@@ -516,12 +489,9 @@ function install_in_chroot() {
         }
 
         function countdown_timer() {
-            for ((i = 1; i >= 0; i--)); do
-                if [ $i -gt 1 ]; then
+            for ((i = 3; i >= 0; i--)); do
+                if [ $i -gt 0 ]; then
                     echo -ne "\r\033[K\e[31mContinuing in \e[34m$i\e[31m seconds\e[0m"
-                elif [ $i -eq 1 ]; then
-                    echo -ne "\r\033[K\e[31mContinuing in 1 second\e[0m"
-                    sleep 1
                 else
                     echo -e "\r\033[K\e[1;34mContinuing\e[0m"
                 fi
@@ -544,8 +514,11 @@ function install_in_chroot() {
         einfo "Testing and Displaying IP and MAC export..."
         /tmp/ip_mac_export
 
-        einfo "Installing kernel and generating fstab..."
-        /tmp/kernel_install_fstab.sh
+        einfo "Building kernel..."
+        /tmp/build_kernel.sh
+
+        einfo "Generating fstab..."
+        /tmp/build_fstab.sh
 
         einfo "Installing NVIDIA drivers..."
         /tmp/nvidia_driver_install.sh
@@ -604,36 +577,12 @@ function cleanup_and_reboot() {
 
 function install_gentoo() {
 
-    function einfo() {
-        local blue='\e[1;34m'   # Light blue
-        local yellow='\e[1;33m' # Yellow
-        local red='\e[1;31m'    # Red
-        local reset='\e[0m'     # Reset text formatting
+    source ./utils/einfo_timer_util.sh
 
-        echo -e "${red}----------------------------------------------------------------------------${reset}"
-        echo -e "${blue}[${yellow}$(date '+%Y-%m-%d %H:%M:%S')${blue}] $1${reset}"
-        echo -e "${red}----------------------------------------------------------------------------${reset}"
-    }
-
-
-    function countdown_timer() {
-        for ((i = 1; i >= 0; i--)); do
-            if [ $i -gt 1 ]; then
-                echo -ne "\r\033[K\e[31mContinuing in \e[34m$i\e[31m seconds\e[0m"
-            elif [ $i -eq 1 ]; then
-                echo -ne "\r\033[K\e[31mContinuing in 1 second\e[0m"
-                sleep 1
-            else
-                echo -e "\r\033[K\e[1;34mContinuing\e[0m"
-            fi
-            sleep 1
-        done
-    }
-
-    einfo "Advanced Decryption Custom Linux Installer"
+    einfo "HPC Gentoo Automated Linux Installer"
     einfo "POC: La Barge, Alexander"
-    einfo "Date: 28 Nov 23"
-    einfo "Version: 0.1"
+    einfo "Date: 1 Dec 23"
+    einfo "Version: 0.1.0"
 
     countdown_timer
 
@@ -665,12 +614,4 @@ function install_gentoo() {
     cleanup_and_reboot
 }
 
-# pacman -Sy curl
-# pacman -Sy wget
-# mkfs.ext4 /dev/vdc
-# mkdir -p /mnt/
-# mount /dev/vdc /mnt/
-# cd /mnt/
-# scp -r skywalker@192.168.50.27:/mnt/500gb/gentoo_automated_build_67/  .
-# Run the installation
 install_gentoo
