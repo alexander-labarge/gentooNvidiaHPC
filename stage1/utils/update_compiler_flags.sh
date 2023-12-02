@@ -1,7 +1,7 @@
 #!/bin/bash
 # update_compiler_flags.sh
 
-source ./einfo_timer_util.sh
+source /tmp/einfo_timer_util.sh
 
 einfo "Syncing to Decryption Team Portage tree..."
 

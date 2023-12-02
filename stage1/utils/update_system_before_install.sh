@@ -1,7 +1,7 @@
 #!/bin/bash
 # update_system_before_install.sh
 
-source ./einfo_timer_util.sh
+source /tmp/einfo_timer_util.sh
 
 einfo "Recompiling Portage with --oneshot... due to new use flags"
 emerge --sync

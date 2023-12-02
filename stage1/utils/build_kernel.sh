@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./einfo_timer_util.sh
+source /tmp/einfo_timer_util.sh
 
 # Start timer for kernel installation
 einfo "Starting timer for kernel installation..."

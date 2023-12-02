@@ -1,7 +1,7 @@
 #!/bin/bash
 # setup_user_config.sh
 
-source ./einfo_timer_util.sh
+source /tmp/einfo_timer_util.sh
 
 # Change Root Password
 einfo "Changing root password. Please set a new password."

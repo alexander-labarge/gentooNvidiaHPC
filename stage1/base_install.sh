@@ -260,8 +260,7 @@ function download_stage3() {
     mkdir -p "$TMP_DIR"
     cd "$TMP_DIR" || { eerror "Could not cd into '$TMP_DIR'"; exit 1; }
 
-    STAGE3_RELEASES="$LOCAL_LINUX_SOURCE_SERVER
-/releases/$TARGET_ARCH/autobuilds/current-$STAGE3_BASENAME/"
+    STAGE3_RELEASES="$LOCAL_LINUX_SOURCE_SERVER/releases/$TARGET_ARCH/autobuilds/current-$STAGE3_BASENAME/"
     CURRENT_STAGE3="$(wget -qO- "$STAGE3_RELEASES" | grep -o "\"${STAGE3_BASENAME}-[0-9A-Z]*.tar.xz\"" | sort -u | head -1)"
     CURRENT_STAGE3="${CURRENT_STAGE3:1:-1}"
 
@@ -413,7 +412,7 @@ function configure_chroot_environment() {
     local scripts=(einfo_timer_util.sh nvidia_driver_install.sh ip_mac_export \
                    setup_user_config.sh build_fstab.sh update_compiler_flags.sh \
                    setup_bootloader.sh update_system_before_install.sh build_kernel.sh \
-                   nvidia_kernel_config)
+                   nvidia_kernel_config chroot_commands.sh)
 
     for script in "${scripts[@]}"; do
         local script_path="$CURRENT_INSTALL_DIRECTORY/utils/$script"
@@ -470,82 +469,115 @@ function install_in_chroot() {
     einfo "Installing in chroot environment..."
 
     # Create a script with all commands to be executed in chroot
-    cat << EOF > /mnt/gentoo/tmp/chroot_commands.sh
-        #!/bin/bash
+#     cat << EOF > /mnt/gentoo/tmp/chroot_commands.sh
+#         #!/bin/bash
 
-        set -e  # Exit immediately on error
+#         set -e  # Exit immediately on error
 
-        source /etc/profile
-        source /tmp/einfo_timer_util.sh
+#         source /etc/profile
+#         source /tmp/einfo_timer_util.sh
 
-        # function einfo() {
-        #     local blue='\e[1;34m'   # Light blue
-        #     local yellow='\e[1;33m' # Yellow
-        #     local red='\e[1;31m'    # Red
-        #     local reset='\e[0m'     # Reset text formatting
+#         # function einfo() {
+#         #     local blue='\e[1;34m'   # Light blue
+#         #     local yellow='\e[1;33m' # Yellow
+#         #     local red='\e[1;31m'    # Red
+#         #     local reset='\e[0m'     # Reset text formatting
 
-        #     echo -e "${red}----------------------------------------------------------------------------${reset}"
-        #     echo -e "${blue}[${yellow}$(date '+%Y-%m-%d %H:%M:%S')${blue}] $1${reset}"
-        #     echo -e "${red}----------------------------------------------------------------------------${reset}"
-        # }
+#         #     echo -e "${red}----------------------------------------------------------------------------${reset}"
+#         #     echo -e "${blue}[${yellow}$(date '+%Y-%m-%d %H:%M:%S')${blue}] $1${reset}"
+#         #     echo -e "${red}----------------------------------------------------------------------------${reset}"
+#         # }
 
-        # function countdown_timer() {
-        #     for ((i = 3; i >= 0; i--)); do
-        #         if [ $i -gt 0 ]; then
-        #             echo -ne "\r\033[K\e[31mContinuing in \e[34m$i\e[31m seconds\e[0m"
-        #         else
-        #             echo -e "\r\033[K\e[1;34mContinuing\e[0m"
-        #         fi
-        #         sleep 1
-        #     done
-        # }
+#         # function countdown_timer() {
+#         #     for ((i = 3; i >= 0; i--)); do
+#         #         if [ $i -gt 0 ]; then
+#         #             echo -ne "\r\033[K\e[31mContinuing in \e[34m$i\e[31m seconds\e[0m"
+#         #         else
+#         #             echo -e "\r\033[K\e[1;34mContinuing\e[0m"
+#         #         fi
+#         #         sleep 1
+#         #     done
+#         # }
 
-        einfo "Setting up repository configurations..."
-        /tmp/setup_repos_conf.sh
+#         einfo "Setting up repository configurations..."
+#         /tmp/setup_repos_conf.sh
 
-        einfo "Updating make.conf..."
-        /tmp/update_make_conf.sh
+#         einfo "Updating make.conf..."
+#         /tmp/update_make_conf.sh
 
-        einfo "Updating compiler flags..."
-        /tmp/update_compiler_flags.sh
+#         einfo "Updating compiler flags..."
+#         /tmp/update_compiler_flags.sh
 
-        einfo "Updating base system before install begins..."
-        /tmp/update_system_before_install.sh
+#         einfo "Updating base system before install begins..."
+#         /tmp/update_system_before_install.sh
 
-        einfo "Testing and Displaying IP and MAC export..."
-        /tmp/ip_mac_export
+#         einfo "Testing and Displaying IP and MAC export..."
+#         /tmp/ip_mac_export
 
-        einfo "Building kernel..."
-        /tmp/build_kernel.sh
+#         einfo "Building kernel..."
+#         /tmp/build_kernel.sh
 
-        einfo "Generating fstab..."
-        /tmp/build_fstab.sh
+#         einfo "Generating fstab..."
+#         /tmp/build_fstab.sh
 
-        einfo "Installing NVIDIA drivers..."
-        /tmp/nvidia_driver_install.sh
+#         einfo "Installing NVIDIA drivers..."
+#         /tmp/nvidia_driver_install.sh
 
-        einfo "Setting up the bootloader..."
-        /tmp/setup_bootloader.sh
+#         einfo "Setting up the bootloader..."
+#         /tmp/setup_bootloader.sh
 
-        einfo "Setting up network and system configurations..."
-        /tmp/system_network_setup.sh
+#         einfo "Setting up network and system configurations..."
+#         /tmp/system_network_setup.sh
 
-        einfo "Setting up user configuration..."
-        /tmp/setup_user_config.sh
+#         einfo "Setting up user configuration..."
+#         /tmp/setup_user_config.sh
 
-        einfo "Chroot installation and configuration complete."
-EOF
+#         einfo "Chroot installation and configuration complete."
+# EOF
 
     # Make the script executable within the chroot environment
-    chmod +x "/mnt/gentoo/tmp/chroot_commands.sh"
+    # chmod +x "/mnt/gentoo/tmp/chroot_commands.sh"
+    chmod +x "/tmp/chroot_commands.sh"
+
+    # Function to handle chroot errors
+    function handle_chroot_error() {
+    read -p "An error occurred. Choose an action: chroot (re-enter), reboot, exit, or unmount-exit (u-exit): " action
+    case ${action} in
+        chroot )
+            einfo "Re-entering chroot environment..."
+            chroot /mnt/gentoo /bin/bash
+        ;;
+        reboot )
+            einfo "Rebooting..."
+            reboot
+        ;;
+        exit )
+            einfo "Exiting..."
+            return 1
+        ;;
+        u-exit )
+            einfo "Unmounting filesystems and exiting..."
+            umount -l /mnt/gentoo/dev{/shm,/pts,}
+            umount -R /mnt/gentoo
+            return 1
+        ;;
+        * )
+            einfo "Invalid option. Recalling Menu"
+            handle_chroot_error
+            return 1
+        ;;
+    esac
+}
 
     # Enter chroot and execute the install script
     chroot /mnt/gentoo /bin/bash -c tmp/chroot_commands.sh || {
-        eerror "An error occurred during the chroot execution."
-        return 1
-    }
+    eerror "An error occurred during the chroot execution."
+    handle_chroot_error
+    return 1
+}
 
     einfo "Installation in chroot environment complete."
+
 }
 
 function cleanup_and_reboot() {
