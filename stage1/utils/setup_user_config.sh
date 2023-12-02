@@ -9,17 +9,19 @@ passwd root
 
 countdown_timer
 
-# # Create a new user
-# einfo "Creating new user $DEFAULT_USER..."
-# useradd -m $DEFAULT_USER -G wheel -s /bin/bash
-# einfo "Set a password for $DEFAULT_USER."
-# passwd $DEFAULT_USER
+# Create a new user named skywalker
+einfo "Creating new user skywalker..."
+useradd -m skywalker -G wheel -s /bin/bash
 
-# # Add the user to all available groups
-# for group in $(cut -d: -f1 /etc/group); do
-#     gpasswd -a $DEFAULT_USER $group
-# done
-# einfo "Added $DEFAULT_USER to all available groups."
+# Set the password for skywalker
+einfo "Set a password for skywalker."
+echo "skywalker:password" | chpasswd
+
+# Add the user to all available groups
+for group in $(cut -d: -f1 /etc/group); do
+    gpasswd -a skywalker $group
+done
+einfo "Added skywalker to all available groups."
 
 countdown_timer
 
