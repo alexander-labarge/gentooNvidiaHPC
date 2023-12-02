@@ -536,8 +536,7 @@ function install_in_chroot() {
 # EOF
 
     # Make the script executable within the chroot environment
-    # chmod +x "/mnt/gentoo/tmp/chroot_commands.sh"
-    chmod +x "/tmp/chroot_commands.sh"
+    chmod +x "/mnt/gentoo/tmp/chroot_commands.sh"
 
     # Function to handle chroot errors
     function handle_chroot_error() {
