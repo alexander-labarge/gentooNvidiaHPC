@@ -1,5 +1,4 @@
 #!/bin/bash
-# Error handling
 # Define ANSI escape codes for red and bold text
 RED_BOLD='\033[1;31m'
 RESET='\033[0m'  # Reset text formatting
