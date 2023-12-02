@@ -1,7 +1,7 @@
 #!/bin/bash
 # nvidia_driver_install.sh
 
-source ./einfo_timer_util.sh
+source /tmp/einfo_timer_util.sh
 
 einfo "Enabling Experimental Performance Package unmasking..."
 echo 'ACCEPT_KEYWORDS="~amd64"' >> /etc/portage/make.conf
