@@ -28,7 +28,7 @@ VAR_LOG_SIZE="100G"
 # System configuration
 TIMEZONE="America/New_York"
 LOCALE="en_US.UTF-8"
-NODE_HOSTNAME="deathstar-tower"
+NODE_HOSTNAME="rogue-tower"
 DEFAULT_USER="skywalker"
 GROUPS_TO_ADD="wheel"
 
@@ -468,73 +468,6 @@ function install_in_chroot() {
 
     einfo "Installing in chroot environment..."
 
-    # Create a script with all commands to be executed in chroot
-#     cat << EOF > /mnt/gentoo/tmp/chroot_commands.sh
-#         #!/bin/bash
-
-#         set -e  # Exit immediately on error
-
-#         source /etc/profile
-#         source /tmp/einfo_timer_util.sh
-
-#         # function einfo() {
-#         #     local blue='\e[1;34m'   # Light blue
-#         #     local yellow='\e[1;33m' # Yellow
-#         #     local red='\e[1;31m'    # Red
-#         #     local reset='\e[0m'     # Reset text formatting
-
-#         #     echo -e "${red}----------------------------------------------------------------------------${reset}"
-#         #     echo -e "${blue}[${yellow}$(date '+%Y-%m-%d %H:%M:%S')${blue}] $1${reset}"
-#         #     echo -e "${red}----------------------------------------------------------------------------${reset}"
-#         # }
-
-#         # function countdown_timer() {
-#         #     for ((i = 3; i >= 0; i--)); do
-#         #         if [ $i -gt 0 ]; then
-#         #             echo -ne "\r\033[K\e[31mContinuing in \e[34m$i\e[31m seconds\e[0m"
-#         #         else
-#         #             echo -e "\r\033[K\e[1;34mContinuing\e[0m"
-#         #         fi
-#         #         sleep 1
-#         #     done
-#         # }
-
-#         einfo "Setting up repository configurations..."
-#         /tmp/setup_repos_conf.sh
-
-#         einfo "Updating make.conf..."
-#         /tmp/update_make_conf.sh
-
-#         einfo "Updating compiler flags..."
-#         /tmp/update_compiler_flags.sh
-
-#         einfo "Updating base system before install begins..."
-#         /tmp/update_system_before_install.sh
-
-#         einfo "Testing and Displaying IP and MAC export..."
-#         /tmp/ip_mac_export
-
-#         einfo "Building kernel..."
-#         /tmp/build_kernel.sh
-
-#         einfo "Generating fstab..."
-#         /tmp/build_fstab.sh
-
-#         einfo "Installing NVIDIA drivers..."
-#         /tmp/nvidia_driver_install.sh
-
-#         einfo "Setting up the bootloader..."
-#         /tmp/setup_bootloader.sh
-
-#         einfo "Setting up network and system configurations..."
-#         /tmp/system_network_setup.sh
-
-#         einfo "Setting up user configuration..."
-#         /tmp/setup_user_config.sh
-
-#         einfo "Chroot installation and configuration complete."
-# EOF
-
     # Make the script executable within the chroot environment
     chmod +x "/mnt/gentoo/tmp/chroot_commands.sh"
 
@@ -609,11 +542,11 @@ function cleanup_and_reboot() {
 
 function install_gentoo() {
 
-    source ./utils/einfo_timer_util.sh
+    source $CURRENT_INSTALL_DIRECTORY/utils/einfo_timer_util.sh
 
-    einfo "HPC Gentoo Automated Linux Installer"
+    einfo "Hight Performance Computing Gentoo Linux Nvidia GPU Automated Linux Installer"
     einfo "POC: La Barge, Alexander"
-    einfo "Date: 1 Dec 23"
+    einfo "Date: $(date '+%e %b %Y')"
     einfo "Version: 0.1.0"
 
     countdown_timer

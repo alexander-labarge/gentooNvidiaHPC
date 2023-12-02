@@ -7,10 +7,16 @@ function einfo() {
     local yellow='\e[1;33m' # Yellow
     local red='\e[1;31m'    # Red
     local reset='\e[0m'     # Reset text formatting
+    local hostname=$(hostname)
+    local current_datetime=$(date '+%Y-%m-%d %H:%M:%S')
+    local log_file="install-log-${hostname}-$(date '+%Y-%m-%d').log"
 
     echo -e "${red}----------------------------------------------------------------------------${reset}"
     echo -e "${blue}[${yellow}$(date '+%Y-%m-%d %H:%M:%S')${blue}] $1${reset}"
     echo -e "${red}----------------------------------------------------------------------------${reset}"
+
+    # Append the log message to the log file
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "/tmp/$log_file"
 }
 
 function countdown_timer() {

@@ -3,11 +3,6 @@
 
 source /tmp/einfo_timer_util.sh
 
-einfo "Enabling Experimental Performance Package unmasking..."
-echo 'ACCEPT_KEYWORDS="~amd64"' >> /etc/portage/make.conf
-countdown_timer
-einfo "Experimental Performance Package unmasking enabled."
-
 # Install Nvidia drivers
 einfo "Installing Nvidia drivers..."
 emerge --verbose x11-drivers/nvidia-drivers

@@ -7,6 +7,20 @@ einfo "Starting timer for kernel installation..."
 start_time=$(date +%s)
 einfo "Compile Start time: $(date)"
 
+einfo "Adding Experimental/ Bleeding Edge Kernel Source Files..."
+einfo "This requires ~amd64 package unmasking."
+einfo "Adding ~amd64 package unmasking..."
+countdown_timer
+einfo "Note: World has been rebuilt with stable packages."
+einfo "Note: This is only for the kernel source files,"
+einfo "the kernel itself, and NVIDIA CUDA Runtime"
+einfo "These packages have been validated by the author."
+countdown_timer
+echo 'ACCEPT_KEYWORDS="~amd64"' >> /etc/portage/make.conf
+countdown_timer
+einfo "Experimental Performance Package unmasking enabled."
+countdown_timer
+
 # Emerge required packages
 einfo "Emerging Linux Kernel Source Files."
 countdown_timer
