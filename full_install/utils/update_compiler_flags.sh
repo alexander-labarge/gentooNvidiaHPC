@@ -40,10 +40,9 @@ countdown_timer
 einfo "Creating CPU-specific USE flags file..."
 # Create package.use directory if it does not exist
 [ -d /etc/portage/package.use ] || mkdir -p /etc/portage/package.use
-CPU_FLAGS="$(cpuid2cpuflags)"
-echo "*/* ${CPU_FLAGS}" > /etc/portage/package.use/00cpu-flags
+echo "*/* $(cpuid2cpuflags)" > /etc/portage/package.use/00cpu-flags
 einfo "CPU-specific USE flags have been applied."
-einfo "CPU flags added were: ${CPU_FLAGS}"
+einfo "CPU flags added were: ${cpuid2cpuflags}"
 
 countdown_timer
 
