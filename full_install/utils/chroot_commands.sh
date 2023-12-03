@@ -22,6 +22,11 @@ chmod +x /tmp/*.sh
 /tmp/system_network_setup.sh
 /tmp/setup_user_config.sh
 
+einfo "Cleaning up Dependencies..."
+# Clean up dependencies
+emerge --verbose --depclean
+einfo "Dependencies cleaned up."
+
 einfo "Chroot installation and configuration complete."
 
 # End of script

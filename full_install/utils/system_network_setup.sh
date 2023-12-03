@@ -33,7 +33,7 @@ einfo "Setting up the machine ID for systemd"
 systemd-machine-id-setup
 
 einfo "Running systemd-firstboot to configure basic system settings"
-systemd-firstboot --prompt
+systemd-firstboot --locale=en_US.UTF-8 --timezone=America/New_York --hostname="$NODE_HOSTNAME" --root-password="$DEFAULT_USER_PASSWORD"
 
 einfo "Applying default system service presets"
 systemctl preset-all
@@ -62,9 +62,5 @@ einfo "Chrony service enabled"
 einfo "Installing bash completion for enhanced shell usability"
 emerge --verbose --autounmask-continue=y app-shells/bash-completion
 einfo "Bash completion installed"
-
-einfo "Reloading the systemd manager configuration for the final time"
-systemctl daemon-reexec
-einfo "Systemd manager configuration reloaded"
 
 einfo "System and network setup is complete."
