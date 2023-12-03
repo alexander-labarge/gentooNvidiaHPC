@@ -34,7 +34,7 @@ countdown_timer
 
 # Install cpuid2cpuflags and apply CPU-specific USE flags
 einfo "Installing cpuid2cpuflags and applying CPU-specific USE flags..."
-emerge --verbose app-portage/cpuid2cpuflags
+emerge --verbose --autounmask-continue=y app-portage/cpuid2cpuflags
 
 countdown_timer
 einfo "Creating CPU-specific USE flags file..."

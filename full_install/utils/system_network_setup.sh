@@ -9,7 +9,7 @@ einfo "Setting the hostname to $NODE_HOSTNAME"
 echo "$NODE_HOSTNAME" | tee /etc/hostname
 
 einfo "Installing NetworkManager for network management"
-emerge --verbose net-misc/networkmanager
+emerge --verbose --autounmask-continue=y net-misc/networkmanager
 
 einfo "Enabling NetworkManager service to start at boot"
 systemctl enable NetworkManager
@@ -52,7 +52,7 @@ einfo "Applying default system service presets for the second time"
 systemctl preset-all
 
 einfo "Installing Chrony for time synchronization"
-emerge --verbose net-misc/chrony
+emerge --verbose --autounmask-continue=y net-misc/chrony
 einfo "Chrony installed"
 
 einfo "Enabling Chrony service for automatic time synchronization"
@@ -60,7 +60,7 @@ systemctl enable chronyd.service
 einfo "Chrony service enabled"
 
 einfo "Installing bash completion for enhanced shell usability"
-emerge --verbose app-shells/bash-completion
+emerge --verbose --autounmask-continue=y app-shells/bash-completion
 einfo "Bash completion installed"
 
 einfo "Reloading the systemd manager configuration for the final time"

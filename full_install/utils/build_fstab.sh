@@ -1,22 +1,8 @@
 #!/bin/bash
-# kernel_install_fstab.sh
-
-# source /tmp/einfo_timer_util.sh
-
-# # Backup and generate fstab
-# einfo "Backing up and generating fstab..."
-# cp /etc/fstab /etc/fstab.backup
-
-# # Generate fstab
-# emerge --verbose sys-fs/genfstab
-# genfstab -U / > /etc/fstab
-
-#!/bin/bash
 # build_fstab.sh
 
 source /tmp/einfo_timer_util.sh
 source /tmp/install_config.sh
-
 
 # Backup and generate fstab
 einfo "Backing up and generating fstab..."

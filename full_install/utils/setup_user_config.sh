@@ -28,7 +28,7 @@ countdown_timer
 
 # Install sudo
 einfo "Installing sudo..."
-emerge app-admin/sudo
+emerge --verbose --autounmask-continue=y app-admin/sudo
 
 # Allow wheel group to use sudo
 echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
@@ -38,7 +38,7 @@ countdown_timer
 
 # Install SSHD
 einfo "Installing SSHD..."
-emerge net-misc/openssh
+emerge --verbose --autounmask-continue=y net-misc/openssh
 systemctl enable sshd
 # systemctl start sshd
 einfo "SSHD installation complete."
@@ -80,25 +80,5 @@ einfo "Current IP and MAC Address:"
 /tmp/ip_mac_export
 
 countdown_timer
-
-# # Add Public Key to Authorized Keys
-# einfo "Please enter your public key:"
-# read SSH_PUBLIC_KEY
-# mkdir -p /home/$DEFAULT_USER/.ssh
-# echo $SSH_PUBLIC_KEY > /home/$DEFAULT_USER/.ssh/authorized_keys
-# chown -R $DEFAULT_USER:$DEFAULT_USER /home/$DEFAULT_USER/.ssh
-# chmod 700 /home/$DEFAULT_USER/.ssh
-# chmod 600 /home/$DEFAULT_USER/.ssh/authorized_keys
-
-# countdown_timer
-
-einfo "Public Key Authentication Summary:"
-einfo "1. You provided a public SSH key, which is now stored in the server's authorized_keys file."
-einfo "2. This key enables secure, passwordless SSH access to the server."
-einfo "3. To access the server, your SSH client must use the corresponding private key."
-einfo "4. The server verifies your identity by checking if your client's private key matches the stored public key."
-einfo "5. Keep your private key secure: it's your identity for SSH access."
-einfo "6. If the private key is compromised or lost, remove the associated public key from the server immediately."
-einfo "7. Access the server using SSH with your private key, without the need for a password."
 
 einfo "SSHD configuration complete."

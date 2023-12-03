@@ -6,12 +6,12 @@ source /tmp/install_config.sh
 
 # Install Nvidia drivers
 einfo "Installing Nvidia drivers..."
-emerge --verbose x11-drivers/nvidia-drivers
+emerge --verbose --autounmask-continue=y x11-drivers/nvidia-drivers
 einfo "Nvidia drivers installation complete."
 countdown_timer
 
 # Rebuild kernel modules for Nvidia
 einfo "Rebuilding kernel modules for Nvidia..."
-emerge --verbose @module-rebuild
+emerge --verbose --autounmask-continue=y @module-rebuild
 einfo "Kernel modules for Nvidia have been rebuilt."
 countdown_timer

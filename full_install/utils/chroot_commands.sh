@@ -6,7 +6,8 @@ source /tmp/einfo_timer_util.sh
 source /tmp/install_config.sh
 
 einfo "Starting script execution in chroot environment..."
-
+# Set safe umask
+umask 0077
 # Execute various setup and configuration scripts
 chmod +x /tmp/*.sh
 /tmp/setup_repos_conf.sh

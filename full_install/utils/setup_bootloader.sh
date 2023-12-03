@@ -13,7 +13,7 @@ countdown_timer
 
 einfo "Emerging GRUB bootloader"
 # Install GRUB package
-emerge sys-boot/grub || { einfo "Failed to emerge GRUB"; exit 1; }
+emerge --verbose --autounmask-continue=y sys-boot/grub || { einfo "Failed to emerge GRUB"; exit 1; }
 
 countdown_timer
 

@@ -4,10 +4,13 @@
 source /tmp/einfo_timer_util.sh
 source /tmp/install_config.sh
 
+mkdir -p "/etc/portage/package.use/zz-autounmask"
+mkdir -p "/etc/portage/package.keywords/zz-autounmask"
+
 einfo "Recompiling Portage with --oneshot... due to new use flags"
 emerge --sync
 # Emerge Portage with --oneshot
-emerge --oneshot sys-apps/portage
+emerge --verbose --autounmask-continue=y --oneshot sys-apps/portage
 einfo "Portage updated"
 countdown_timer
 
@@ -24,7 +27,6 @@ LOCALE="en_US.UTF-8" # Replace with your locale
 einfo "Configuring time zone and locale..."
 # Configure time zone and locale
 ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
-sed -i 's/# \($LOCALE\)/\1/' /etc/locale.gen
 locale-gen
 echo "LANG=\"$LOCALE\"" > /etc/env.d/02locale
 env-update && source /etc/profile

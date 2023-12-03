@@ -28,19 +28,19 @@ countdown_timer
 
 einfo "Installing Linux Firmware..."
 countdown_timer
-emerge --verbose sys-kernel/linux-firmware
+emerge --verbose --autounmask-continue=y sys-kernel/linux-firmware
 
 einfo "Installing Intel Microcode..."
 countdown_timer
-emerge --verbose sys-firmware/intel-microcode
+emerge --verbose --autounmask-continue=y sys-firmware/intel-microcode
 
 einfo "Installing Gentoo Sources..."
 countdown_timer
-emerge --verbose sys-kernel/gentoo-sources
+emerge --verbose --autounmask-continue=y sys-kernel/gentoo-sources
 
 einfo "Installing Genkernel for Bootloader Integration..."
 countdown_timer
-emerge --verbose sys-kernel/genkernel
+emerge --verbose --autounmask-continue=y sys-kernel/genkernel
 
 einfo "Packages emerged successfully."
 
