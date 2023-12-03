@@ -9,7 +9,7 @@ function einfo() {
     local reset='\e[0m'     # Reset text formatting
     local hostname=$(hostname)
     local current_datetime=$(date '+%Y-%m-%d %H:%M:%S')
-    local log_file="install-log-${hostname}-$(date '+%Y-%m-%d').log"
+    local log_file="/install-log-${hostname}-$(date '+%Y-%m-%d').log"
 
     echo -e "${red}----------------------------------------------------------------------------${reset}"
     echo -e "${blue}[${yellow}$(date '+%Y-%m-%d %H:%M:%S')${blue}] $1${reset}"
