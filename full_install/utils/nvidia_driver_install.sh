@@ -15,9 +15,3 @@ einfo "Rebuilding kernel modules for Nvidia..."
 emerge --verbose @module-rebuild
 einfo "Kernel modules for Nvidia have been rebuilt."
 countdown_timer
-
-# Regenerate GRUB configuration
-einfo "Regenerating GRUB configuration..."
-grub-mkconfig -o /boot/grub/grub.cfg
-einfo "GRUB configuration regeneration complete."
-countdown_timer
