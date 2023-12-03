@@ -33,7 +33,12 @@ countdown_timer
 
 # Install cpuid2cpuflags and apply CPU-specific USE flags
 einfo "Installing cpuid2cpuflags and applying CPU-specific USE flags..."
-emerge app-portage/cpuid2cpuflags
+emerge --verbose app-portage/cpuid2cpuflags
+
+countdown_timer
+einfo "Creating CPU-specific USE flags file..."
+# Create package.use directory if it does not exist
+[ -d /etc/portage/package.use ] || mkdir -p /etc/portage/package.use
 CPU_FLAGS="$(cpuid2cpuflags)"
 echo "*/* ${CPU_FLAGS}" > /etc/portage/package.use/00cpu-flags
 einfo "CPU-specific USE flags have been applied."
