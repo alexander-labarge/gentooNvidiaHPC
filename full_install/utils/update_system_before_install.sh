@@ -20,11 +20,6 @@ emerge --sync
 einfo "Portage tree updated."
 countdown_timer
 
-# Set your time zone and locale here
-TIMEZONE="America/New_York" # Replace with your time zone
-LOCALE="en_US.UTF-8" # Replace with your locale
-COLLATE="C.UTF-8"
-
 einfo "Configuring time zone and locale..."
 # Configure time zone and locale
 ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime

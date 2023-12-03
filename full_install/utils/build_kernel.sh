@@ -3,11 +3,6 @@
 source /tmp/einfo_timer_util.sh
 source /tmp/install_config.sh
 
-# Start timer for kernel installation
-einfo "Starting timer for kernel installation..."
-start_time=$(date +%s)
-einfo "Compile Start time: $(date)"
-
 einfo "Adding Experimental/ Bleeding Edge Kernel Source Files..."
 einfo "This requires ~amd64 package unmasking."
 einfo "Adding ~amd64 package unmasking..."
@@ -44,8 +39,8 @@ emerge --verbose --autounmask-continue=y sys-kernel/genkernel
 
 einfo "Packages emerged successfully."
 
-# Compile Kernel
-einfo "Compiling Kernel..."
+countdown_timer
+einfo "Getting Kernel Build Environment Ready..."
 countdown_timer
 
 kernel_dir="/usr/src"
@@ -55,8 +50,8 @@ latest_kernel=$(ls -d ${kernel_dir}/linux-* | sort -V | tail -n 1)
 
 # Extract kernel version from the directory name and define the new directory name
 # This line removes the 'linux-' prefix and the '-gentoo-r1' suffix
-kernel_ver=$(basename "$latest_kernel" | sed -e 's/linux-//' -e 's/-gentoo-r1//')
-new_kernel_dir="${kernel_dir}/linux-${kernel_ver}-deathstar-amd64"
+kernel_ver=$(basename "$latest_kernel" | sed -e 's/linux-//' -e 's/-gentoo-//')
+new_kernel_dir="${kernel_dir}/linux-${kernel_ver}-skywalker-amd64-bleeding-edge"
 
 # Rename the latest kernel directory
 mv "$latest_kernel" "$new_kernel_dir"
@@ -69,8 +64,7 @@ einfo "Symlink created for $(basename "$new_kernel_dir")"
 # Import Custom Kernel Paramater Config File
 countdown_timer
 einfo "Importing NVIDIA GPU High Performance Oriented Kernel Config File..."
-# cp /tmp/kernel_config_intel_nvidia_6.6.3_2Dec23 /usr/src/linux/.config
-cp /tmp/nvidia_kernel_config /usr/src/linux/.config
+cp /tmp/6.6.4-skywalker-amd64-bleedingedge.config /usr/src/linux/.config
 einfo "Kernel Config File Imported Successfully."
 einfo "Kernel Source Directory: $new_kernel_dir"
 einfo "Kernel Version: $kernel_ver"
@@ -91,12 +85,21 @@ einfo "Compiling Kernel..."
 countdown_timer
 # Compile the kernel with the number of processors available
 einfo "Compiling Kernel with $(nproc) CPU processor cores..."
+# Start timer for kernel installation
+einfo "Starting timer for kernel compile..."
+start_time=$(date +%s)
+einfo "Compile Start time: $(date)"
+
 make -C "$kernel_src" -j$(nproc)
 einfo "Kernel Compiled Successfully."
 end_time=$(date +%s)
 elapsed_time=$((end_time - start_time))
-einfo "End time: $(date)"
-einfo "Kernel Compile took $elapsed_time seconds."
+# Convert to minutes and seconds
+minutes=$((elapsed_time / 60))
+seconds=$((elapsed_time % 60))
+
+# Display the elapsed time
+einfo "Kernel Compile took $minutes minutes and $seconds seconds."
 
 countdown_timer
 einfo "Installing Kernel..."
