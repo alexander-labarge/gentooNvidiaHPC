@@ -1,7 +1,7 @@
 #!/bin/bash
-# Define ANSI escape codes for red and bold text
-RED_BOLD='\033[1;31m'
-RESET='\033[0m'  # Reset text formatting
+
+chmod +x ./utils/*.sh
+source ./utils/install_config.sh
 
 # Function to print an error message in red and bold
 eerror() {
@@ -11,45 +11,6 @@ eerror() {
 # Set up an error trap to call eerror and exit
 trap 'eerror "An error occurred. Exiting..."; exit 1' ERR
 set -e
-
-# Drive identifier
-DRIVE="sda"
-
-# Predefined partition sizes
-EFI_SIZE="1G"
-HOME_SIZE="100G"
-VAR_SIZE="100G"
-TMP_SIZE="100G"
-USR_SIZE="100G"
-OPT_SIZE="100G"
-VAR_LOG_SIZE="100G"
-
-# System configuration
-TIMEZONE="America/New_York"
-LOCALE="en_US.UTF-8"
-NODE_HOSTNAME="rogue-tower"
-DEFAULT_USER="skywalker"
-GROUPS_TO_ADD="wheel"
-
-# Server and network configuration
-MIRROR_SERVER_IP="192.168.50.124"
-IP_MAC_PROGRAM_ADDR="http://$MIRROR_SERVER_IP/gentoo/ip_mac_export"
-LOCAL_LINUX_SOURCE_SERVER="http://$MIRROR_SERVER_IP/gentoo/gentoo-source/"
-LOCAL_PORTAGE_RSYNC_SERVER="rsync://$MIRROR_SERVER_IP/typhon-portage"
-
-# Gentoo specific
-TARGET_ARCH="amd64"
-STAGE3_BASENAME="stage3-amd64-systemd"
-
-# Directories
-TMP_DIR="/tmp/gentoo-stage3-download"
-BINDED_INSTALL_DIRECTORY="/tmp/chroot-transfer"
-CURRENT_INSTALL_DIRECTORY="$PWD"
-
-# Chroot directories
-INSTALL_DIR="$PWD"
-CHROOT_TMP_DIRECTORY="/mnt/gentoo/tmp"
-CHROOT_OPT_DIRECTORY="/mnt/gentoo/opt"
 
 # Function Definitions
 function select_drive() {
@@ -305,101 +266,6 @@ function copy_etc_dns_hosts_info() {
     einfo "Hosts file copied."
 }
 
-function generate_repos_conf_script() {
-    einfo "Generating setup_repos_conf.sh script..."
-    cat << OUTER_EOF > /mnt/gentoo/tmp/setup_repos_conf.sh
-#!/bin/bash
-source /tmp/einfo_timer_util.sh
-
-# Create the repos.conf directory
-mkdir -p /etc/portage/repos.conf
-
-# Create and configure the gentoo.conf file
-cat << INNER_EOF > /etc/portage/repos.conf/gentoo.conf
-[DEFAULT]
-main-repo = gentoo
-
-[gentoo]
-location = /var/db/repos/gentoo
-sync-type = rsync
-sync-uri = $LOCAL_PORTAGE_RSYNC_SERVER
-auto-sync = yes
-sync-rsync-verify-jobs = 1
-sync-rsync-verify-metamanifest = no
-sync-openpgp-key-path = /usr/share/openpgp-keys/gentoo-release.asc
-INNER_EOF
-
-einfo "Portage repository configuration complete."
-OUTER_EOF
-    chmod +x /mnt/gentoo/tmp/setup_repos_conf.sh
-}
-
-function generate_make_conf_update_script() {
-    einfo "Generating update_make_conf.sh script..."
-    cat << EOF > /mnt/gentoo/tmp/update_make_conf.sh
-#!/bin/bash
-source /tmp/einfo_timer_util.sh
-
-# Update the make.conf file with the GENTOO_MIRRORS setting
-if grep -q "^GENTOO_MIRRORS" /etc/portage/make.conf; then
-    # Update the existing GENTOO_MIRRORS entry
-    sed -i "/^GENTOO_MIRRORS/c\GENTOO_MIRRORS=\"$LOCAL_LINUX_SOURCE_SERVER\"" /etc/portage/make.conf
-else
-    # Add a new GENTOO_MIRRORS entry
-    echo "GENTOO_MIRRORS=\"$LOCAL_LINUX_SOURCE_SERVER\"" >> /etc/portage/make.conf
-fi
-echo 'ACCEPT_LICENSE="*"' >> /etc/portage/make.conf
-echo 'VIDEO_CARDS="nvidia"' >> /etc/portage/make.conf
-echo 'USE="X"' >> /etc/portage/make.conf
-echo 'LC_MESSAGES=C.utf8' >> /etc/portage/make.conf
-einfo "make.conf updated with new GENTOO_MIRRORS setting."
-EOF
-    chmod +x /mnt/gentoo/tmp/update_make_conf.sh
-}
-
-function generate_system_network_setup_script() {
-    einfo "Generating system_network_setup.sh script..."
-    cat << EOF > /mnt/gentoo/tmp/system_network_setup.sh
-#!/bin/bash
-source /tmp/einfo_timer_util.sh
-
-einfo "Setting the hostname to $NODE_HOSTNAME"
-echo "$NODE_HOSTNAME" | tee /etc/hostname
-
-einfo "Installing network services"
-emerge net-misc/networkmanager
-einfo "NetworkManager installed"
-
-einfo "Enabling NetworkManager"
-systemctl enable NetworkManager
-einfo "NetworkManager enabled"
-
-einfo "Installing Chrony for time synchronization"
-emerge net-misc/chrony
-einfo "Chrony installed"
-
-einfo "Enabling Chrony service"
-systemctl enable chronyd.service
-einfo "Chrony service enabled"
-
-einfo "Installing bash completion for enhanced shell usability"
-emerge app-shells/bash-completion
-einfo "Bash completion installed"
-
-einfo "Reloading the systemd manager configuration"
-systemctl daemon-reexec
-einfo "Systemd manager configuration reloaded"
-
-einfo "Setting up the machine ID and systemd presets"
-systemd-firstboot --prompt --setup-machine-id
-systemctl preset-all
-einfo "Machine ID and systemd presets setup complete"
-
-einfo "System and network setup is complete."
-EOF
-    einfo "system_network_setup.sh script generated"
-}
-
 function configure_chroot_environment() {
 
     einfo "Configuring chroot environment..."
@@ -411,7 +277,8 @@ function configure_chroot_environment() {
     local scripts=(einfo_timer_util.sh nvidia_driver_install.sh ip_mac_export \
                    setup_user_config.sh build_fstab.sh update_compiler_flags.sh \
                    setup_bootloader.sh update_system_before_install.sh build_kernel.sh \
-                   nvidia_kernel_config chroot_commands.sh \)
+                   nvidia_kernel_config chroot_commands.sh install_config.sh \
+                   setup_repos_conf.sh update_make_conf.sh system_network_setup.sh)
 
     for script in "${scripts[@]}"; do
         local script_path="$CURRENT_INSTALL_DIRECTORY/utils/$script"
@@ -422,28 +289,7 @@ function configure_chroot_environment() {
         fi
     done
 
-    # # Copy Source Code to /mnt/gentoo/opt
-    # einfo "Copying Source Code to $CHROOT_OPT_DIRECTORY"
-    # local source_codes=(nvhpc_2023_2311_Linux_x86_64_cuda_12.3.tar.gz \
-    #                     cuda_gdb_src-all-all-12.3.101.tar.gz \
-    #                     git-repos.tar.xz \
-    #                     hashcat-master.zip john-bleeding-jumbo.zip)
-
-    # for source_code in "${source_codes[@]}"; do
-    #     local source_code_path="$CURRENT_INSTALL_DIRECTORY/source_code/$source_code"
-    #     if [ -f "$source_code_path" ]; then
-    #         cp "$source_code_path" "$CHROOT_OPT_DIRECTORY/"
-    #     else
-    #         eerror "Source code $source_code not found in $source_code_path"
-    #     fi
-    # done
-
-    # Generate and copy additional scripts
-    generate_repos_conf_script
-    generate_make_conf_update_script
-    generate_system_network_setup_script
-
-    einfo "All Scripts Generated and/or copied."
+    einfo "All Scripts Copied into Chroot Environment."
 
     countdown_timer
 
@@ -460,7 +306,10 @@ function configure_chroot_environment() {
     einfo "Chroot environment configured."
 
     # Copy DNS Hostings info and mount system devices
+    einfo "Copying DNS Hostings info and mounting system devices..."
     copy_etc_dns_hosts_info
+    einfo "DNS Hostings info copied."
+    countdown_timer
 }
 
 function install_in_chroot() {

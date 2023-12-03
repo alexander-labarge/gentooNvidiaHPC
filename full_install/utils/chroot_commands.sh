@@ -7,6 +7,7 @@ source /tmp/einfo_timer_util.sh
 einfo "Starting script execution in chroot environment..."
 
 # Execute various setup and configuration scripts
+chmod +x /tmp/*.sh
 /tmp/setup_repos_conf.sh
 /tmp/update_make_conf.sh
 /tmp/update_compiler_flags.sh
