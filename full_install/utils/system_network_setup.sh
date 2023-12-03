@@ -2,36 +2,68 @@
 source /tmp/install_config.sh
 source /tmp/einfo_timer_util.sh
 
+einfo "Re-executing the systemd manager to ensure it's up to date"
+systemctl daemon-reexec
+
 einfo "Setting the hostname to $NODE_HOSTNAME"
 echo "$NODE_HOSTNAME" | tee /etc/hostname
 
-einfo "Installing network services"
-emerge net-misc/networkmanager
-einfo "NetworkManager installed"
+einfo "Installing NetworkManager for network management"
+emerge --verbose net-misc/networkmanager
 
-einfo "Enabling NetworkManager"
+einfo "Enabling NetworkManager service to start at boot"
 systemctl enable NetworkManager
-einfo "NetworkManager enabled"
+
+einfo "Re-executing the systemd manager for the second time"
+systemctl daemon-reexec
+
+einfo "Copying NetworkManager connection profiles"
+CONNECTIONS_DIR="/etc/NetworkManager/system-connections"
+SOURCE_DIR="/tmp/system-connections" # Update this path
+
+if [ -d "$SOURCE_DIR" ]; then
+    cp -a "$SOURCE_DIR/"* "$CONNECTIONS_DIR/"
+    einfo "NetworkManager connection profiles copied"
+else
+    eerror "Source directory for NetworkManager connections not found"
+fi
+
+einfo "Setting up the machine ID for systemd"
+systemd-machine-id-setup
+
+einfo "Running systemd-firstboot to configure basic system settings"
+systemd-firstboot --prompt
+
+einfo "Applying default system service presets"
+systemctl preset-all
+
+einfo "Setting system language to en_US.UTF-8"
+LANG="en_US.utf8"
+echo "LANG=en_US.utf8" | tee /etc/locale.conf
+
+einfo "Updating environment variables and sourcing profile"
+env-update && source /etc/profile
+
+einfo "Adding $NODE_USERNAME to the systemd-journal group"
+gpasswd -a "$NODE_USERNAME" systemd-journal
+
+einfo "Applying default system service presets for the second time"
+systemctl preset-all
 
 einfo "Installing Chrony for time synchronization"
-emerge net-misc/chrony
+emerge --verbose net-misc/chrony
 einfo "Chrony installed"
 
-einfo "Enabling Chrony service"
+einfo "Enabling Chrony service for automatic time synchronization"
 systemctl enable chronyd.service
 einfo "Chrony service enabled"
 
 einfo "Installing bash completion for enhanced shell usability"
-emerge app-shells/bash-completion
+emerge --verbose app-shells/bash-completion
 einfo "Bash completion installed"
 
-einfo "Reloading the systemd manager configuration"
+einfo "Reloading the systemd manager configuration for the final time"
 systemctl daemon-reexec
 einfo "Systemd manager configuration reloaded"
-
-einfo "Setting up the machine ID and systemd presets"
-systemd-firstboot --prompt --setup-machine-id
-systemctl preset-all
-einfo "Machine ID and systemd presets setup complete"
 
 einfo "System and network setup is complete."

@@ -14,11 +14,11 @@ OPT_SIZE="100G"
 VAR_LOG_SIZE="100G"
 
 # System configuration
-TIMEZONE="America/New_York"
-LOCALE="en_US.UTF-8"
 NODE_HOSTNAME="deathstar-test"
 DEFAULT_USER="skywalker"
 GROUPS_TO_ADD="wheel"
+TIMEZONE="America/New_York"
+LOCALE="en_US.UTF-8"
 
 # Server and network configuration
 MIRROR_SERVER_IP="192.168.50.124"
