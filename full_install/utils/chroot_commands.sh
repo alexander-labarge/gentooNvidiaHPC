@@ -3,6 +3,7 @@
 # Source necessary profiles and utilities
 source /etc/profile
 source /tmp/einfo_timer_util.sh
+source /tmp/install_config.sh
 
 einfo "Starting script execution in chroot environment..."
 

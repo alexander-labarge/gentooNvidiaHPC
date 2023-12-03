@@ -2,6 +2,7 @@
 # update_compiler_flags.sh
 
 source /tmp/einfo_timer_util.sh
+source /tmp/install_config.sh
 
 einfo "Syncing to Decryption Team Portage tree..."
 

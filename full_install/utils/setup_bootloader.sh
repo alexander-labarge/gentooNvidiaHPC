@@ -2,6 +2,7 @@
 # setup_bootloader.sh
 
 source /tmp/einfo_timer_util.sh
+source /tmp/install_config.sh
 
 einfo "Setting up GRUB for UEFI booting"
 # Add GRUB UEFI support to make.conf

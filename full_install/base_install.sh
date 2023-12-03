@@ -143,9 +143,7 @@ function mount_file_systems() {
     einfo "Root mount point created."
     mount "/dev/${DRIVE}8" "/mnt/gentoo"  # Assuming root is the 8th partition
     einfo "Mounted root partition."
-
-    countdown_timer
-    
+  
     # Mount EFI partition
     einfo "Making EFI directory... at /efi"
     mkdir -p "/mnt/gentoo/efi"
@@ -153,51 +151,45 @@ function mount_file_systems() {
     mount "/dev/${DRIVE}1" "/mnt/gentoo/efi"  # Assuming EFI is the 1st partition
     einfo "Mounted EFI partition."
 
-    countdown_timer
-
     # Mount /home partition
     mkdir -p "/mnt/gentoo/home"
     mount "/dev/${DRIVE}2" "/mnt/gentoo/home"  # Assuming /home is the 2nd partition
     einfo "Mounted /home partition."
-
-    countdown_timer
 
     # Mount /var partition
     mkdir -p "/mnt/gentoo/var"
     mount "/dev/${DRIVE}3" "/mnt/gentoo/var"  # Assuming /var is the 3rd partition
     einfo "Mounted /var partition."
 
-    countdown_timer
-
     # Mount /tmp partition
     mkdir -p "/mnt/gentoo/tmp"
     mount "/dev/${DRIVE}4" "/mnt/gentoo/tmp"  # Assuming /tmp is the 4th partition
     einfo "Mounted /tmp partition."
-
-    countdown_timer
 
     # Mount /usr partition
     mkdir -p "/mnt/gentoo/usr"
     mount "/dev/${DRIVE}5" "/mnt/gentoo/usr"  # Assuming /usr is the 5th partition
     einfo "Mounted /usr partition."
 
-    countdown_timer
-
     # Mount /opt partition
     mkdir -p "/mnt/gentoo/opt"
     mount "/dev/${DRIVE}6" "/mnt/gentoo/opt"  # Assuming /opt is the 6th partition
     einfo "Mounted /opt partition."
-
-    countdown_timer
 
     # Mount /var/log partition
     mkdir -p "/mnt/gentoo/var/log"
     mount "/dev/${DRIVE}7" "/mnt/gentoo/var/log"  # Assuming /var/log is the 7th partition
     einfo "Mounted /var/log partition."
 
-    einfo "ALL Filesystems mounted."
+    einfo "ALL Filesystems mounted. Getting Mounting Info..."
 
     countdown_timer
+
+    einfo "Mounting Info:"
+    findmnt -R -t ext4,vfat -o TARGET,SOURCE,FSTYPE /mnt/gentoo
+
+    countdown_timer
+
 }
 
 function mount_system_devices() {
@@ -303,13 +295,18 @@ function configure_chroot_environment() {
     einfo "Making all scripts in $CHROOT_TMP_DIRECTORY executable..."
     chmod +x "$CHROOT_TMP_DIRECTORY"/*.sh
     einfo "All scripts in $CHROOT_TMP_DIRECTORY are now executable."
-    einfo "Chroot environment configured."
+    
+    countdown_timer
 
     # Copy DNS Hostings info and mount system devices
     einfo "Copying DNS Hostings info and mounting system devices..."
     copy_etc_dns_hosts_info
     einfo "DNS Hostings info copied."
     countdown_timer
+
+    einfo "Chroot environment configured."
+
+    countdown_timer    
 }
 
 function install_in_chroot() {
@@ -319,43 +316,11 @@ function install_in_chroot() {
     # Make the script executable within the chroot environment
     chmod +x "/mnt/gentoo/tmp/chroot_commands.sh"
 
-    # Function to handle chroot errors
-    function handle_chroot_error() {
-    read -p "An error occurred. Choose an action: chroot (re-enter), reboot, exit, or unmount-exit (u-exit): " action
-    case ${action} in
-        chroot )
-            einfo "Re-entering chroot environment..."
-            chroot /mnt/gentoo /bin/bash
-        ;;
-        reboot )
-            einfo "Rebooting..."
-            reboot
-        ;;
-        exit )
-            einfo "Exiting..."
-            return 1
-        ;;
-        u-exit )
-            einfo "Unmounting filesystems and exiting..."
-            umount -l /mnt/gentoo/dev{/shm,/pts,}
-            umount -R /mnt/gentoo
-            return 1
-        ;;
-        * )
-            einfo "Invalid option. Recalling Menu"
-            handle_chroot_error
-            return 1
-        ;;
-    esac
-}
-
     # Enter chroot and execute the install script
     chroot /mnt/gentoo /bin/bash -c tmp/chroot_commands.sh || {
     eerror "An error occurred during the chroot execution."
-    handle_chroot_error
     return 1
 }
-
     einfo "Installation in chroot environment complete."
 
 }
@@ -386,7 +351,6 @@ function cleanup_and_reboot() {
     esac
     einfo "System cleanup complete."
 }
-
 
 function install_gentoo() {
 

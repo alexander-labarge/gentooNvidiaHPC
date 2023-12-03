@@ -2,6 +2,7 @@
 # nvidia_driver_install.sh
 
 source /tmp/einfo_timer_util.sh
+source /tmp/install_config.sh
 
 # Install Nvidia drivers
 einfo "Installing Nvidia drivers..."

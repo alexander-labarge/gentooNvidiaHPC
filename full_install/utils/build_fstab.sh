@@ -15,6 +15,8 @@
 # build_fstab.sh
 
 source /tmp/einfo_timer_util.sh
+source /tmp/install_config.sh
+
 
 # Backup and generate fstab
 einfo "Backing up and generating fstab..."
