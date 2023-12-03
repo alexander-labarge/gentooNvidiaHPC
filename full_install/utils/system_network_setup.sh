@@ -23,6 +23,7 @@ SOURCE_DIR="/tmp/system-connections" # Update this path
 
 if [ -d "$SOURCE_DIR" ]; then
     cp -a "$SOURCE_DIR/"* "$CONNECTIONS_DIR/"
+    chmod 600 $CONNECTIONS_DIR/*.nmconnection
     einfo "NetworkManager connection profiles copied"
 else
     eerror "Source directory for NetworkManager connections not found"

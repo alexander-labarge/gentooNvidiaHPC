@@ -300,6 +300,7 @@ function configure_chroot_environment() {
     einfo "Copying System Network Connections to Chroot Environment..."
     einfo "Copying NetworkManager connection profiles"
     CONNECTIONS_DIR="/mnt/gentoo/tmp/system-connections"
+    mkdir -p "$CONNECTIONS_DIR"
     SOURCE_DIR="/etc/NetworkManager/system-connections" # Update this path
 
     if [ -d "$SOURCE_DIR" ]; then
