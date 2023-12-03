@@ -411,8 +411,7 @@ function configure_chroot_environment() {
     local scripts=(einfo_timer_util.sh nvidia_driver_install.sh ip_mac_export \
                    setup_user_config.sh build_fstab.sh update_compiler_flags.sh \
                    setup_bootloader.sh update_system_before_install.sh build_kernel.sh \
-                   nvidia_kernel_config chroot_commands.sh \
-                   kernel_config_intel_nvidia_6.6.3_2Dec23)
+                   nvidia_kernel_config chroot_commands.sh \)
 
     for script in "${scripts[@]}"; do
         local script_path="$CURRENT_INSTALL_DIRECTORY/utils/$script"
