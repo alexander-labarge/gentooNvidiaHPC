@@ -13,7 +13,8 @@ countdown_timer
 einfo "Emerging GRUB bootloader"
 # Install GRUB package
 emerge sys-boot/grub || { einfo "Failed to emerge GRUB"; exit 1; }
-
+OS_PROBER_LINE="GRUB_DISABLE_OS_PROBER=false"
+echo "$OS_PROBER_LINE" | tee -a /etc/default/grub
 countdown_timer
 
 einfo "Installing GRUB bootloader to EFI System Partition"
