@@ -271,7 +271,7 @@ function configure_chroot_environment() {
                    setup_bootloader.sh update_system_before_install.sh build_kernel.sh \
                    nvidia_kernel_config chroot_commands.sh install_config.sh \
                    setup_repos_conf.sh update_make_conf.sh system_network_setup.sh \
-                   persistent_static_ip_address.sh)
+                   persistent_static_ip_address.sh 6.6.4-skywalker-amd64-bleedingedge.config)
 
     for script in "${scripts[@]}"; do
         local script_path="$CURRENT_INSTALL_DIRECTORY/utils/$script"
