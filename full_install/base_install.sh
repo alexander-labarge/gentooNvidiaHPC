@@ -270,7 +270,8 @@ function configure_chroot_environment() {
                    setup_user_config.sh build_fstab.sh update_compiler_flags.sh \
                    setup_bootloader.sh update_system_before_install.sh build_kernel.sh \
                    nvidia_kernel_config chroot_commands.sh install_config.sh \
-                   setup_repos_conf.sh update_make_conf.sh system_network_setup.sh)
+                   setup_repos_conf.sh update_make_conf.sh system_network_setup.sh \
+                   persistent_static_ip_address.sh)
 
     for script in "${scripts[@]}"; do
         local script_path="$CURRENT_INSTALL_DIRECTORY/utils/$script"
@@ -290,6 +291,23 @@ function configure_chroot_environment() {
     ls -l "$CHROOT_TMP_DIRECTORY/"
 
     countdown_timer
+
+    einfo "Making Directory in Chroot Enviornment to Copy System Network Connections..."
+    mkdir -p "$CHROOT_TMP_DIRECTORY/system-connections"
+    einfo "Directory Created."
+
+    countdown_timer
+    einfo "Copying System Network Connections to Chroot Environment..."
+    einfo "Copying NetworkManager connection profiles"
+    CONNECTIONS_DIR="/tmp/system-connections"
+    SOURCE_DIR="/etc/NetworkManager/system-connections" # Update this path
+
+    if [ -d "$SOURCE_DIR" ]; then
+        cp -a "$SOURCE_DIR/"* "$CONNECTIONS_DIR/"
+        einfo "NetworkManager connection profiles copied"
+    else
+        eerror "Source directory for NetworkManager connections not found"
+    fi
 
     # Make all scripts executable
     einfo "Making all scripts in $CHROOT_TMP_DIRECTORY executable..."

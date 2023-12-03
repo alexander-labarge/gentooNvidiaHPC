@@ -1,0 +1,9 @@
+[connection]
+id=static-wlo1
+type=wifi
+interface-name=wlo1
+
+[ipv4]
+method=manual
+address1=192.168.50.251,192.168.50.1
+dns=192.168.50.1
