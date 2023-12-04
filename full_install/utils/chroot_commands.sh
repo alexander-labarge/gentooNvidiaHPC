@@ -6,8 +6,7 @@ source /tmp/einfo_timer_util.sh
 source /tmp/install_config.sh
 
 einfo "Starting script execution in chroot environment..."
-# Set safe umask
-umask 0077
+
 # Execute various setup and configuration scripts
 chmod +x /tmp/*.sh
 /tmp/setup_repos_conf.sh
@@ -21,8 +20,8 @@ chmod +x /tmp/*.sh
 /tmp/setup_bootloader.sh
 /tmp/system_network_setup.sh
 /tmp/setup_user_config.sh
-/tmp/munge_install.sh
-/tmp/slurm_install.sh
+# /tmp/munge_install.sh
+# /tmp/slurm_install.sh
 
 einfo "Cleaning up Dependencies..."
 # Clean up dependencies
