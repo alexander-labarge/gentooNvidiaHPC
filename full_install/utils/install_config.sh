@@ -26,6 +26,7 @@ COLLATE="C.UTF-8"
 
 # Server and network configuration
 MIRROR_SERVER_IP="192.168.50.124"
+MIRROR_SERVER_EXTRAS_WGET_ADDRESS="http://$MIRROR_SERVER_IP/gentoo/gentoo-install-extras"
 IP_MAC_PROGRAM_ADDR="http://$MIRROR_SERVER_IP/gentoo/ip_mac_export"
 LOCAL_LINUX_SOURCE_SERVER="http://$MIRROR_SERVER_IP/gentoo/gentoo-source/"
 LOCAL_PORTAGE_RSYNC_SERVER="rsync://$MIRROR_SERVER_IP/typhon-portage"

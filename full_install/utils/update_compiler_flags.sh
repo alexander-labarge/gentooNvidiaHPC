@@ -42,7 +42,7 @@ einfo "Creating CPU-specific USE flags file..."
 [ -d /etc/portage/package.use ] || mkdir -p /etc/portage/package.use
 echo "*/* $(cpuid2cpuflags)" > /etc/portage/package.use/00cpu-flags
 einfo "CPU-specific USE flags have been applied."
-einfo "CPU flags added were: ${cpuid2cpuflags}"
+einfo "CPU flags added were: $(cpuid2cpuflags)"
 
 countdown_timer
 
