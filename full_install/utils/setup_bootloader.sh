@@ -26,7 +26,7 @@ einfo "This ensures that the UEFI firmware will load GRUB."
 countdown_timer
 
 # Install GRUB to the EFI directory
-grub-install --target=x86_64-efi --efi-directory=/efi --removable || { einfo "Failed to install GRUB"; exit 1; }
+grub-install --target=x86_64-efi --efi-directory=/efi || { einfo "Failed to install GRUB"; exit 1; }
 einfo "GRUB bootloader installation complete"
 
 countdown_timer
