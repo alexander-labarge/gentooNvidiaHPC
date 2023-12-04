@@ -20,9 +20,11 @@ chmod +x /tmp/*.sh
 /tmp/setup_bootloader.sh
 /tmp/system_network_setup.sh
 /tmp/setup_user_config.sh
-# /tmp/munge_install.sh
-# /tmp/slurm_install.sh
-
+# /tmp/program_installs/munge_install.sh
+# /tmp/program_installs/slurm_install.sh
+# /tmp/program_installs/mpi_install.sh
+# /tmp/program_installs/high_performance_cuda_sdk_install.sh
+# /tmp/program_installs/hashcat_install.sh
 einfo "Cleaning up Dependencies..."
 # Clean up dependencies
 emerge --verbose --depclean

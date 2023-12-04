@@ -259,75 +259,87 @@ function copy_etc_dns_hosts_info() {
 }
 
 function configure_chroot_environment() {
-
     einfo "Configuring chroot environment..."
 
-    # Create the directories
-    mkdir -p "$CHROOT_TMP_DIRECTORY" "$CHROOT_OPT_DIRECTORY"
+    # Create the necessary directories
+    mkdir -p "$CHROOT_TMP_DIRECTORY" "$CHROOT_OPT_DIRECTORY" \
+             "$CHROOT_TMP_DIRECTORY/program_installs" \
+             "$CHROOT_TMP_DIRECTORY/system-connections"
 
-    # Copy external scripts to the chroot environment
-    local scripts=(einfo_timer_util.sh nvidia_driver_install.sh ip_mac_export \
-                   setup_user_config.sh build_fstab.sh update_compiler_flags.sh \
-                   setup_bootloader.sh update_system_before_install.sh build_kernel.sh \
-                   nvidia_kernel_config chroot_commands.sh install_config.sh \
-                   setup_repos_conf.sh update_make_conf.sh system_network_setup.sh \
-                   persistent_static_ip_address.sh 6.6.4-skywalker-amd64-bleedingedge.config \
-                   slurm_install.sh munge_install.sh)
+    # Associative array for script paths
+    declare -A script_paths=(
+        [utils]="utils"
+        [program_install_scripts]="program_install_scripts"
+    )
 
-    for script in "${scripts[@]}"; do
-        local script_path="$CURRENT_INSTALL_DIRECTORY/utils/$script"
-        if [ -f "$script_path" ]; then
-            cp "$script_path" "$CHROOT_TMP_DIRECTORY/"
-        else
-            eerror "Script $script not found in $script_path"
-        fi
-    done
+    # Copy scripts function
+    copy_scripts() {
+        local script_dir="$1"
+        local destination="$2"
+        local path="$CURRENT_INSTALL_DIRECTORY/$script_dir"
+        for script in "$path"/*; do
+            if [ -f "$script" ]; then
+                cp "$script" "$destination"
+            else
+                eerror "Script $script not found"
+            fi
+        done
+    }
+
+    # Copy scripts from both directories
+    copy_scripts "${script_paths[utils]}" "$CHROOT_TMP_DIRECTORY"
+    copy_scripts "${script_paths[program_install_scripts]}" "$CHROOT_TMP_DIRECTORY/program_installs"
 
     einfo "All Scripts Copied into Chroot Environment."
-
     countdown_timer
 
     # Display all scripts in the chroot environment
-    einfo "Listing all scripts in $CHROOT_TMP_DIRECTORY:"
+    einfo "Listing all scripts in $CHROOT_TMP_DIRECTORY and $CHROOT_TMP_DIRECTORY/program_installs:"
     ls -l "$CHROOT_TMP_DIRECTORY/"
-
+    ls -l "$CHROOT_TMP_DIRECTORY/program_installs/"
     countdown_timer
 
-    einfo "Making Directory in Chroot Enviornment to Copy System Network Connections..."
-    mkdir -p "$CHROOT_TMP_DIRECTORY/system-connections"
-    einfo "Directory Created."
+    # Copy NetworkManager connection profiles
+    copy_network_connections
 
-    countdown_timer
+    # Make all scripts executable
+    make_all_scripts_executable
+
+    # Copy DNS Hostings info and mount system devices
+    copy_dns_and_mount_devices
+
+    einfo "Chroot environment configured."
+    countdown_timer    
+}
+
+function copy_network_connections() {
     einfo "Copying System Network Connections to Chroot Environment..."
-    einfo "Copying NetworkManager connection profiles"
-    CONNECTIONS_DIR="/mnt/gentoo/tmp/system-connections"
-    mkdir -p "$CONNECTIONS_DIR"
-    SOURCE_DIR="/etc/NetworkManager/system-connections" # Update this path
+    local connections_dir="/mnt/gentoo/tmp/system-connections"
+    local source_dir="/etc/NetworkManager/system-connections" # Update this path
 
-    if [ -d "$SOURCE_DIR" ]; then
-        cp -a "$SOURCE_DIR/"* "$CONNECTIONS_DIR/"
+    mkdir -p "$connections_dir"
+    if [ -d "$source_dir" ]; then
+        cp -a "$source_dir/"* "$connections_dir/"
         einfo "NetworkManager connection profiles copied"
     else
         eerror "Source directory for NetworkManager connections not found"
     fi
-
-    # Make all scripts executable
-    einfo "Making all scripts in $CHROOT_TMP_DIRECTORY executable..."
-    chmod +x "$CHROOT_TMP_DIRECTORY"/*.sh
-    einfo "All scripts in $CHROOT_TMP_DIRECTORY are now executable."
-    
     countdown_timer
+}
 
-    # Copy DNS Hostings info and mount system devices
-    einfo "Copying DNS Hostings info and mounting system devices..."
+function make_all_scripts_executable() {
+    chmod +x "$CHROOT_TMP_DIRECTORY"/*.sh "$CHROOT_TMP_DIRECTORY/program_installs"/*.sh
+    einfo "All scripts in $CHROOT_TMP_DIRECTORY and program_installs are now executable."
+    countdown_timer
+}
+
+function copy_dns_and_mount_devices() {
+    einfo "Copying DNS Info from Host to Chroot Environment..."
     copy_etc_dns_hosts_info
     einfo "DNS Hostings info copied."
     countdown_timer
-
-    einfo "Chroot environment configured."
-
-    countdown_timer    
 }
+
 
 function install_in_chroot() {
 
@@ -347,21 +359,25 @@ function install_in_chroot() {
 
 function cleanup_and_reboot() {
     read -p "Do you want to unmount filesystems and cleanup? (y/n) " unmount_answer
-    if [[ ${unmount_answer:0:1} =~ [yY] ]]; then
+    if [[ ${unmount_answer,,} =~ ^(yes|y)$ ]]; then
         einfo "Unmounting filesystems..."
-        umount -l /mnt/gentoo/dev{/shm,/pts,}
-        umount -R /mnt/gentoo
+        if umount -l /mnt/gentoo/dev{/shm,/pts,} && umount -R /mnt/gentoo; then
+            einfo "Filesystems unmounted successfully."
+        else
+            eerror "Failed to unmount some filesystems."
+            return 1
+        fi
     else
         einfo "Skipping unmounting."
     fi
 
     read -p "Do you want to reboot now, re-enter chroot, or exit? (reboot/chroot/exit) " action
-    case ${action} in
-        reboot|Reboot )
+    case ${action,,} in
+        reboot )
             einfo "Rebooting..."
             reboot
         ;;
-        chroot|Chroot )
+        chroot )
             einfo "Re-entering chroot environment..."
             chroot /mnt/gentoo /bin/bash
         ;;
@@ -371,6 +387,7 @@ function cleanup_and_reboot() {
     esac
     einfo "System cleanup complete."
 }
+
 
 function install_gentoo() {
 

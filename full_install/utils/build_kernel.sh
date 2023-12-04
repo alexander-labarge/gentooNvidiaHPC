@@ -64,7 +64,7 @@ einfo "Symlink created for $(basename "$new_kernel_dir")"
 # Import Custom Kernel Paramater Config File
 countdown_timer
 einfo "Importing NVIDIA GPU High Performance Oriented Kernel Config File..."
-cp /tmp/6.6.4-skywalker-amd64-bleedingedge.config /usr/src/linux/.config
+cp /tmp/nvidia_kernel_config /usr/src/linux/.config
 einfo "Kernel Config File Imported Successfully."
 einfo "Kernel Source Directory: $new_kernel_dir"
 einfo "Kernel Version: $kernel_ver"

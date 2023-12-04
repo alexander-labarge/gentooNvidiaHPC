@@ -35,32 +35,6 @@ systemd-firstboot --locale=en_US.UTF-8 --timezone=America/New_York --hostname="$
 einfo "Applying default system service presets"
 systemctl preset-all --preset-mode=enable-only
 
-# Define the cron jobs
-CRON_JOB="@reboot /usr/bin/systemctl start NetworkManager"
-CRON_JOB_TWO="@reboot /usr/bin/systemctl enable NetworkManager"
-CRON_JOB_CLEANUP="@hourly /opt/cleanup_script.sh"
-
-# Path to the cleanup script
-CLEANUP_SCRIPT="/opt/cleanup_script.sh"
-
-# Create the cleanup script
-cat << EOF > "$CLEANUP_SCRIPT"
-#!/bin/bash
-# Remove the cron jobs
-(crontab -l | grep -v -F "$CRON_JOB" | grep -v -F "$CRON_JOB_TWO") | crontab -
-# Delete the cleanup script
-rm -- "$0"
-EOF
-
-# Make the cleanup script executable
-chmod +x "$CLEANUP_SCRIPT"
-
-# Check if the cron jobs already exist and add them if they don't
-if ! crontab -l | grep -Fq "$CRON_JOB"; then
-    # Add the cron jobs to the crontab
-    (crontab -l 2>/dev/null; echo "$CRON_JOB"; echo "$CRON_JOB_TWO"; echo "$CRON_JOB_CLEANUP") | crontab -
-fi
-
 einfo "Setting system language to en_US.UTF-8"
 LANG="en_US.utf8"
 echo "LANG=en_US.utf8" | tee /etc/locale.conf
@@ -81,6 +55,18 @@ einfo "Chrony installed"
 einfo "Enabling Chrony service for automatic time synchronization"
 systemctl enable chronyd.service
 einfo "Chrony service enabled"
+
+einfo "Copying NetworkManager connection profiles"
+CONNECTIONS_DIR="/etc/NetworkManager/system-connections"
+SOURCE_DIR="/tmp/system-connections" # Update this path
+
+if [ -d "$SOURCE_DIR" ]; then
+    cp -a "$SOURCE_DIR/"* "$CONNECTIONS_DIR/"
+    chmod 600 $CONNECTIONS_DIR/*.nmconnection
+    einfo "NetworkManager connection profiles copied"
+else
+    eerror "Source directory for NetworkManager connections not found"
+fi
 
 einfo "Installing bash completion for enhanced shell usability"
 emerge --verbose --autounmask-continue=y app-shells/bash-completion
