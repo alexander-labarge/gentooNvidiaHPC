@@ -15,3 +15,11 @@ einfo "Rebuilding kernel modules for Nvidia..."
 emerge --verbose --autounmask-continue=y @module-rebuild
 einfo "Kernel modules for Nvidia have been rebuilt."
 countdown_timer
+
+einfo "Installing NVIDIA High Performance Cuda SDK"
+wget $MIRROR_SERVER_EXTRAS_WGET_ADDRESS/nvhpc_2023_2311_Linux_x86_64_cuda_12.3.tar.gz
+tar xpzf nvhpc_2023_2311_Linux_x86_64_cuda_12.3.tar.gz
+nvhpc_2023_2311_Linux_x86_64_cuda_12.3/install
+
+# wget $MIRROR_SERVER_EXTRAS_WGET_ADDRESS/cuda_12.3.1_545.23.08_linux.run
+# chmod +x cuda_12.3.1_545.23.08_linux.run
