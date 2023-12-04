@@ -14,9 +14,6 @@ emerge --verbose --autounmask-continue=y net-misc/networkmanager
 einfo "Enabling NetworkManager service to start at boot"
 systemctl enable NetworkManager
 
-einfo "Re-executing the systemd manager for the second time"
-systemctl daemon-reexec
-
 einfo "Copying NetworkManager connection profiles"
 CONNECTIONS_DIR="/etc/NetworkManager/system-connections"
 SOURCE_DIR="/tmp/system-connections" # Update this path
@@ -36,7 +33,7 @@ einfo "Running systemd-firstboot to configure basic system settings"
 systemd-firstboot --locale=en_US.UTF-8 --timezone=America/New_York --hostname="$NODE_HOSTNAME" --root-password="$DEFAULT_USER_PASSWORD"
 
 einfo "Applying default system service presets"
-systemctl preset-all
+systemctl preset-all --preset-mode=enable-only
 
 einfo "Setting system language to en_US.UTF-8"
 LANG="en_US.utf8"
