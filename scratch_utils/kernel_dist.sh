@@ -20,7 +20,7 @@ genkernel all --microcode=none
 
 # Step 3: Rebuild NVIDIA modules
 echo "Rebuilding NVIDIA modules..."
-emerge --ask @module-rebuild
+emerge --verbose --autounmask-continue=y @module-rebuild
 
 # Step 4: Update GRUB configuration
 echo "Updating GRUB configuration..."
