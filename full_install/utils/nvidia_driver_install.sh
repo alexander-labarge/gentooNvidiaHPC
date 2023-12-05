@@ -16,5 +16,3 @@ emerge --verbose --autounmask-continue=y @module-rebuild
 einfo "Kernel modules for Nvidia have been rebuilt."
 countdown_timer
 
-# wget $MIRROR_SERVER_EXTRAS_WGET_ADDRESS/cuda_12.3.1_545.23.08_linux.run
-# chmod +x cuda_12.3.1_545.23.08_linux.run
