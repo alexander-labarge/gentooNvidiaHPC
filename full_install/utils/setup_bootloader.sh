@@ -32,8 +32,8 @@ einfo "GRUB bootloader installation complete"
 countdown_timer
 
 einfo "Generating GRUB configuration file"
-OS_PROBER_LINE="GRUB_DISABLE_OS_PROBER=false"
-echo "$OS_PROBER_LINE" | tee -a /etc/default/grub
+#OS_PROBER_LINE="GRUB_DISABLE_OS_PROBER=false"
+#echo "$OS_PROBER_LINE" | tee -a /etc/default/grub
 # Generate GRUB config
 grub-mkconfig -o /boot/grub/grub.cfg || { einfo "Failed to generate GRUB config"; exit 1; }
 einfo "GRUB configuration file generation complete"

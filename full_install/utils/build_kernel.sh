@@ -51,7 +51,7 @@ latest_kernel=$(ls -d ${kernel_dir}/linux-* | sort -V | tail -n 1)
 # Extract kernel version from the directory name and define the new directory name
 # This line removes the 'linux-' prefix and the '-gentoo-r1' suffix
 kernel_ver=$(basename "$latest_kernel" | sed -e 's/linux-//' -e 's/-gentoo-//')
-new_kernel_dir="${kernel_dir}/linux-${kernel_ver}-skywalker-amd64-bleeding-edge"
+new_kernel_dir="${kernel_dir}/linux-${kernel_ver}-labarge-nvidia-amd64-bleeding-edge"
 
 # Rename the latest kernel directory
 mv "$latest_kernel" "$new_kernel_dir"

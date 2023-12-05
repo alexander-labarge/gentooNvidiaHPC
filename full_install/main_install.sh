@@ -1,7 +1,13 @@
 #!/bin/bash
 
 chmod +x ./utils/*.sh
-source ./utils/install_config.sh
+if [ -f ./utils/install_config.sh ]; then
+    source ./utils/install_config.sh
+else
+    echo "install_config.sh not found. Exiting..."
+    exit 1
+fi
+
 
 # Function to print an error message in red and bold
 eerror() {
