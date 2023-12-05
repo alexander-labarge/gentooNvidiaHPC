@@ -29,13 +29,6 @@ make -sj$(nproc) || { einfo "Compilation failed"; exit 1; }
 # Install John the Ripper
 make install || { einfo "Installation failed"; exit 1; }
 
-# Add John the Ripper to PATH
-echo 'export PATH=$PATH:/opt/john/run' >> ~/.bashrc
-einfo "John the Ripper path added to ~/.bashrc"
-
-# Update current session's PATH
-export PATH=$PATH:/opt/john/run
-
 # Check if installation was successful
 if [ -f /opt/john/run/john ]; then
     einfo "John the Ripper installed successfully."
