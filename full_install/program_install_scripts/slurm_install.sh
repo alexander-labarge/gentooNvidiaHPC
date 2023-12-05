@@ -8,7 +8,7 @@ source /tmp/install_config.sh || { echo "Failed to source /tmp/install_config.sh
 set -e
 
 einfo "Emerging necessary packages for Slurm..."
-emerge --autounmask-continue --verbose sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-libs/openssl sys-libs/zlib virtual/mpi dev-util/pkgconf dev-libs/json-c
+emerge --autounmask-continue --verbose sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-libs/openssl sys-libs/zlib dev-util/pkgconf dev-libs/json-c
 
 # Download and unpack Slurm source tarball
 einfo "Downloading and unpacking Slurm..."

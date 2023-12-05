@@ -19,6 +19,12 @@ function einfo() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "/tmp/$log_file"
 }
 
+function einfo_purple_bold() {
+    local purple_bold='\e[1;35m' # Purple and bold
+    local reset='\e[0m'          # Reset text formatting
+    echo -e "${purple_bold}$1${reset}"
+}
+
 function countdown_timer() {
     for ((i = 3; i >= 0; i--)); do
         if [ $i -gt 0 ]; then
