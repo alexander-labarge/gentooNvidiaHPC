@@ -24,7 +24,7 @@ chmod +x /tmp/*.sh
 /tmp/program_installs/hashcat_install.sh
 /tmp/program_installs/munge_install.sh
 /tmp/program_installs/slurm_install.sh
-# /tmp/program_installs/mpi_install.sh
+/tmp/program_installs/john_install.sh
 
 
 einfo "Cleaning up Dependencies..."

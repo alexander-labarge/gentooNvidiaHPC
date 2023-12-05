@@ -11,21 +11,6 @@ echo "$NODE_HOSTNAME" | tee /etc/hostname
 einfo "Installing NetworkManager for network management"
 emerge --verbose --autounmask-continue=y net-misc/networkmanager
 
-einfo "Enabling NetworkManager service to start at boot"
-systemctl enable NetworkManager
-
-einfo "Copying NetworkManager connection profiles"
-CONNECTIONS_DIR="/etc/NetworkManager/system-connections"
-SOURCE_DIR="/tmp/system-connections" # Update this path
-
-if [ -d "$SOURCE_DIR" ]; then
-    cp -a "$SOURCE_DIR/"* "$CONNECTIONS_DIR/"
-    chmod 600 $CONNECTIONS_DIR/*.nmconnection
-    einfo "NetworkManager connection profiles copied"
-else
-    eerror "Source directory for NetworkManager connections not found"
-fi
-
 einfo "Setting up the machine ID for systemd"
 systemd-machine-id-setup
 
@@ -47,6 +32,45 @@ gpasswd -a "$NODE_USERNAME" systemd-journal
 
 einfo "Applying default system service presets for the second time"
 systemctl preset-all
+
+einfo "Enabling NetworkManager service to start at boot"
+systemctl enable NetworkManager
+
+einfo "Copying NetworkManager connection profiles"
+CONNECTIONS_DIR="/etc/NetworkManager/system-connections"
+SOURCE_DIR="/tmp/system-connections" # Update this path
+
+if [ -d "$SOURCE_DIR" ]; then
+    cp -a "$SOURCE_DIR/"* "$CONNECTIONS_DIR/"
+    chmod 600 $CONNECTIONS_DIR/*.nmconnection
+    einfo "NetworkManager connection profiles copied"
+else
+    eerror "Source directory for NetworkManager connections not found"
+fi
+
+countdown_timer
+
+einfo "Creating custom service to ensure NetworkManager starts on boot"
+
+# Creating custom service to ensure NetworkManager starts on boot
+tee /etc/systemd/system/start-network-manager-reboot.service <<EOF
+[Unit]
+Description=Start NetworkManager after First Reboot
+After=network.target network-online.target
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 30
+ExecStart=/usr/bin/systemctl start NetworkManager
+
+[Install]
+WantedBy=default.target
+EOF
+
+countdown_timer
+
+# Enable the custom service
+systemctl enable start-network-manager-reboot.service
 
 einfo "Installing Chrony for time synchronization"
 emerge --verbose --autounmask-continue=y net-misc/chrony
