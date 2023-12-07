@@ -1,4 +1,7 @@
 #!/bin/bash
+# Set up an error trap to call eerror and exit
+trap 'eerror "An error occurred. Exiting..."; exit 1' ERR
+set -e
 
 chmod +x ./utils/*.sh
 if [ -f ./utils/install_config.sh ]; then
@@ -253,7 +256,7 @@ function prepare_base_system() {
     einfo "Base system prepared."
 }
 
-function copy_etc_dns_hosts_info() {
+function copy_dns() {
     einfo "Copying DNS info..."
     einfo "Using rsync with the -av options ensures that ownership and permissions are preserved during the copy operation."
     einfo "Rsyncing /etc/resolv.conf to /mnt/gentoo/etc/resolv.conf"
@@ -269,8 +272,7 @@ function configure_chroot_environment() {
 
     # Create the necessary directories
     mkdir -p "$CHROOT_TMP_DIRECTORY" "$CHROOT_OPT_DIRECTORY" \
-             "$CHROOT_TMP_DIRECTORY/program_installs" \
-             "$CHROOT_TMP_DIRECTORY/system-connections"
+             "$CHROOT_TMP_DIRECTORY/program_installs"
 
     # Associative array for script paths
     declare -A script_paths=(
@@ -305,47 +307,39 @@ function configure_chroot_environment() {
     ls -l "$CHROOT_TMP_DIRECTORY/program_installs/"
     countdown_timer
 
-    # Copy NetworkManager connection profiles
-    copy_network_connections
+    # # Copy NetworkManager connection profiles
+    # copy_network_connections
 
     # Make all scripts executable
     make_all_scripts_executable
 
     # Copy DNS Hostings info and mount system devices
-    copy_dns_and_mount_devices
+    copy_dns
 
     einfo "Chroot environment configured."
     countdown_timer    
 }
 
-function copy_network_connections() {
-    einfo "Copying System Network Connections to Chroot Environment..."
-    local connections_dir="/mnt/gentoo/tmp/system-connections"
-    local source_dir="/etc/NetworkManager/system-connections" # Update this path
+# function copy_network_connections() {
+#     einfo "Copying System Network Connections to Chroot Environment..."
+#     local connections_dir="/mnt/gentoo/tmp/system-connections"
+#     local source_dir="/etc/NetworkManager/system-connections" # Update this path
 
-    mkdir -p "$connections_dir"
-    if [ -d "$source_dir" ]; then
-        cp -a "$source_dir/"* "$connections_dir/"
-        einfo "NetworkManager connection profiles copied"
-    else
-        eerror "Source directory for NetworkManager connections not found"
-    fi
-    countdown_timer
-}
+#     mkdir -p "$connections_dir"
+#     if [ -d "$source_dir" ]; then
+#         cp -a "$source_dir/"* "$connections_dir/"
+#         einfo "NetworkManager connection profiles copied"
+#     else
+#         eerror "Source directory for NetworkManager connections not found"
+#     fi
+#     countdown_timer
+# }
 
 function make_all_scripts_executable() {
     chmod +x "$CHROOT_TMP_DIRECTORY"/*.sh "$CHROOT_TMP_DIRECTORY/program_installs"/*.sh
     einfo "All scripts in $CHROOT_TMP_DIRECTORY and program_installs are now executable."
     countdown_timer
 }
-
-function copy_dns_and_mount_devices() {
-    einfo "Copying DNS Info from Host to Chroot Environment..."
-    copy_etc_dns_hosts_info
-    einfo "DNS Hostings info copied."
-    countdown_timer
-}
-
 
 function install_in_chroot() {
 
